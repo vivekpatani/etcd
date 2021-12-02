@@ -254,6 +254,8 @@ Experimental feature:
     Set time duration after which a warning is generated if a unary request takes more than this duration.
   --experimental-max-learners '1'
     Set the max number of learner members allowed in the cluster membership.
+  --experimental-namespace-quota-enforcement 0
+	Specifies the operation mode of the Namespace Quota Enforcement feature.
 
 Unsafe feature:
   --force-new-cluster 'false'

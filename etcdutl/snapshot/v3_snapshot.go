@@ -86,6 +86,8 @@ type v3Manager struct {
 	cl        *membership.RaftCluster
 
 	skipHashCheck bool
+
+	namespaceQuotaEnforcement int
 }
 
 // hasChecksum returns "true" if the file size "n"
@@ -202,6 +204,9 @@ type RestoreConfig struct {
 	// InitialClusterToken is the initial cluster token for etcd cluster during restore bootstrap.
 	InitialClusterToken string
 
+	// NamespaceQuotaEnforcement configures the namespace quote enforcement
+	NamespaceQuotaEnforcement int
+
 	// SkipHashCheck is "true" to ignore snapshot integrity hash value
 	// (required if copied from data directory).
 	SkipHashCheck bool
@@ -220,11 +225,12 @@ func (s *v3Manager) Restore(cfg RestoreConfig) error {
 	}
 
 	srv := config.ServerConfig{
-		Logger:              s.lg,
-		Name:                cfg.Name,
-		PeerURLs:            pURLs,
-		InitialPeerURLsMap:  ics,
-		InitialClusterToken: cfg.InitialClusterToken,
+		Logger:                    s.lg,
+		Name:                      cfg.Name,
+		PeerURLs:                  pURLs,
+		InitialPeerURLsMap:        ics,
+		InitialClusterToken:       cfg.InitialClusterToken,
+		NamespaceQuotaEnforcement: cfg.NamespaceQuotaEnforcement,
 	}
 	if err = srv.VerifyBootstrap(); err != nil {
 		return err
@@ -255,6 +261,7 @@ func (s *v3Manager) Restore(cfg RestoreConfig) error {
 	s.walDir = walDir
 	s.snapDir = filepath.Join(dataDir, "member", "snap")
 	s.skipHashCheck = cfg.SkipHashCheck
+	s.namespaceQuotaEnforcement = cfg.NamespaceQuotaEnforcement
 
 	s.lg.Info(
 		"restoring snapshot",

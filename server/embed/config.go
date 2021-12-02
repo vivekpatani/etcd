@@ -64,6 +64,8 @@ const (
 	DefaultListenPeerURLs   = "http://localhost:2380"
 	DefaultListenClientURLs = "http://localhost:2379"
 
+	DefaultNamespaceQuotaEnforcement = 0
+
 	DefaultLogOutput = "default"
 	JournalLogOutput = "systemd/journal"
 	StdErrLogOutput  = "stderr"
@@ -338,6 +340,8 @@ type Config struct {
 	// ExperimentalMaxLearners sets a limit to the number of learner members that can exist in the cluster membership.
 	ExperimentalMaxLearners int `json:"experimental-max-learners"`
 
+	NamespaceQuotaEnforcement int `json:"experimental-namespace-quota-enforcement"`
+
 	// ForceNewCluster starts a new cluster even if previously started; unsafe.
 	ForceNewCluster bool `json:"force-new-cluster"`
 
@@ -468,6 +472,8 @@ func NewConfig() *Config {
 		GRPCKeepAliveMinTime:  DefaultGRPCKeepAliveMinTime,
 		GRPCKeepAliveInterval: DefaultGRPCKeepAliveInterval,
 		GRPCKeepAliveTimeout:  DefaultGRPCKeepAliveTimeout,
+
+		NamespaceQuotaEnforcement: DefaultNamespaceQuotaEnforcement,
 
 		SocketOpts: transport.SocketOpts{
 			ReusePort:    false,

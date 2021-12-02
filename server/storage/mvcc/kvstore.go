@@ -18,6 +18,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"go.etcd.io/etcd/server/v3/namespacequota"
 	"hash/crc32"
 	"math"
 	"sync"
@@ -70,6 +71,8 @@ type store struct {
 
 	le lease.Lessor
 
+	nqm namespacequota.NamespaceQuotaManager
+
 	// revMuLock protects currentRev and compactMainRev.
 	// Locked at end of write txn and released after write txn unlock lock.
 	// Locked before locking read txn and released after locking.
@@ -88,7 +91,7 @@ type store struct {
 
 // NewStore returns a new store. It is useful to create a store inside
 // mvcc pkg. It should only be used for testing externally.
-func NewStore(lg *zap.Logger, b backend.Backend, le lease.Lessor, cfg StoreConfig) *store {
+func NewStore(lg *zap.Logger, b backend.Backend, le lease.Lessor, nqm namespacequota.NamespaceQuotaManager, cfg StoreConfig) *store {
 	if lg == nil {
 		lg = zap.NewNop()
 	}
@@ -105,6 +108,8 @@ func NewStore(lg *zap.Logger, b backend.Backend, le lease.Lessor, cfg StoreConfi
 
 		le: le,
 
+		nqm: nqm,
+
 		currentRev:     1,
 		compactMainRev: -1,
 
@@ -118,6 +123,9 @@ func NewStore(lg *zap.Logger, b backend.Backend, le lease.Lessor, cfg StoreConfi
 	s.WriteView = &writeView{s}
 	if s.le != nil {
 		s.le.SetRangeDeleter(func() lease.TxnDelete { return s.Write(traceutil.TODO()) })
+	}
+	if s.nqm != nil {
+		s.nqm.SetReadView(&readView{s})
 	}
 
 	tx := s.b.BatchTx()
@@ -460,9 +468,9 @@ func restoreIntoIndex(lg *zap.Logger, idx index) (chan<- revKeyValue, <-chan int
 					}
 					continue
 				}
-				ki.put(lg, rev.main, rev.sub)
+				ki.put(lg, rev.main, rev.sub, len(rkv.kv.Value))
 			} else if !isTombstone(rkv.key) {
-				ki.restore(lg, revision{rkv.kv.CreateRevision, 0}, rev, rkv.kv.Version)
+				ki.restore(lg, revision{rkv.kv.CreateRevision, 0}, rev, rkv.kv.Version, len(rkv.kv.Value))
 				idx.Insert(ki)
 				kiCache[rkv.kstr] = ki
 			}

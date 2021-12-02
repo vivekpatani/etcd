@@ -152,6 +152,8 @@ type ClusterConfig struct {
 	GRPCKeepAliveInterval time.Duration
 	GRPCKeepAliveTimeout  time.Duration
 
+	NamespaceQuotaEnforcement int
+
 	// SkipCreatingClient to skip creating clients for each member.
 	SkipCreatingClient bool
 
@@ -335,6 +337,7 @@ func (c *Cluster) mustNewMember(t testutil.TB, memberNumber int64) *Member {
 			LeaseCheckpointPersist:      c.Cfg.LeaseCheckpointPersist,
 			WatchProgressNotifyInterval: c.Cfg.WatchProgressNotifyInterval,
 			ExperimentalMaxLearners:     c.Cfg.ExperimentalMaxLearners,
+			NamespaceQuotaEnforcement:   c.Cfg.NamespaceQuotaEnforcement,
 		})
 	m.DiscoveryURL = c.Cfg.DiscoveryURL
 	if c.Cfg.UseGRPC {
@@ -639,6 +642,7 @@ type MemberConfig struct {
 	LeaseCheckpointPersist      bool
 	WatchProgressNotifyInterval time.Duration
 	ExperimentalMaxLearners     int
+	NamespaceQuotaEnforcement   int
 }
 
 // MustNewMember return an inited member with the given name. If peerTLS is
@@ -737,6 +741,7 @@ func MustNewMember(t testutil.TB, mcfg MemberConfig) *Member {
 	m.EnableLeaseCheckpoint = mcfg.EnableLeaseCheckpoint
 	m.LeaseCheckpointInterval = mcfg.LeaseCheckpointInterval
 	m.LeaseCheckpointPersist = mcfg.LeaseCheckpointPersist
+	m.NamespaceQuotaEnforcement = mcfg.NamespaceQuotaEnforcement
 
 	m.WatchProgressNotifyInterval = mcfg.WatchProgressNotifyInterval
 
@@ -1532,6 +1537,8 @@ type GrpcAPI struct {
 	Lock lockpb.LockClient
 	// Election is the election API for the client'Server connection.
 	Election epb.ElectionClient
+	// NamespaceQuota is the NamespaceQuota API for the client's connection
+	NamespaceQuota pb.NamespaceQuotaClient
 }
 
 // GetLearnerMembers returns the list of learner members in Cluster using MemberList API.

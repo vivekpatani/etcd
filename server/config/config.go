@@ -156,6 +156,9 @@ type ServerConfig struct {
 	// LeaseCheckpointPersist enables persisting remainingTTL to prevent indefinite auto-renewal of long lived leases. Always enabled in v3.6. Should be used to ensure smooth upgrade from v3.5 clusters with this feature enabled.
 	LeaseCheckpointPersist bool
 
+	// NamespaceQuotaEnforcement configures the enforcement status of NamespaceQuota
+	NamespaceQuotaEnforcement int
+
 	EnableGRPCGateway bool
 
 	// ExperimentalEnableDistributedTracing enables distributed tracing using OpenTelemetry protocol.

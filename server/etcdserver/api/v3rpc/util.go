@@ -16,6 +16,7 @@ package v3rpc
 
 import (
 	"context"
+	"go.etcd.io/etcd/server/v3/namespacequota"
 	"strings"
 
 	pb "go.etcd.io/etcd/api/v3/etcdserverpb"
@@ -68,6 +69,10 @@ var toGRPCErrorMap = map[error]error{
 	lease.ErrLeaseNotFound:    rpctypes.ErrGRPCLeaseNotFound,
 	lease.ErrLeaseExists:      rpctypes.ErrGRPCLeaseExist,
 	lease.ErrLeaseTTLTooLarge: rpctypes.ErrGRPCLeaseTTLTooLarge,
+
+	namespacequota.ErrNamespaceQuotaExceeded: rpctypes.ErrGRPCNamespaceQuotaExceeded,
+	namespacequota.ErrNamespaceQuotaNotFound: rpctypes.ErrNamespaceQuotaNotFound,
+	namespacequota.ErrNamespaceQuotaRestoreFailed: rpctypes.ErrNamespaceQuotaRestoreFailed,
 
 	auth.ErrRootUserNotExist:     rpctypes.ErrGRPCRootUserNotExist,
 	auth.ErrRootRoleNotExist:     rpctypes.ErrGRPCRootRoleNotExist,

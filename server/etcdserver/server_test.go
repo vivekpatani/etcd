@@ -18,6 +18,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"go.etcd.io/etcd/server/v3/namespacequota"
 	"math"
 	"net/http"
 	"os"
@@ -1035,7 +1036,7 @@ func TestSnapshot(t *testing.T) {
 		v2store:      st,
 		consistIndex: cindex.NewConsistentIndex(be),
 	}
-	srv.kv = mvcc.New(zap.NewExample(), be, &lease.FakeLessor{}, mvcc.StoreConfig{})
+	srv.kv = mvcc.New(zap.NewExample(), be, &lease.FakeLessor{}, &namespacequota.FakeNamespaceQuotaManager{}, mvcc.StoreConfig{})
 	srv.be = be
 
 	ch := make(chan struct{}, 2)
@@ -1124,7 +1125,7 @@ func TestSnapshotOrdering(t *testing.T) {
 	}
 	s.applyV2 = &applierV2store{store: s.v2store, cluster: s.cluster}
 
-	s.kv = mvcc.New(lg, be, &lease.FakeLessor{}, mvcc.StoreConfig{})
+	s.kv = mvcc.New(lg, be, &lease.FakeLessor{}, &namespacequota.FakeNamespaceQuotaManager{}, mvcc.StoreConfig{})
 	s.be = be
 
 	s.start()
@@ -1198,7 +1199,7 @@ func TestTriggerSnap(t *testing.T) {
 	}
 	srv.applyV2 = &applierV2store{store: srv.v2store, cluster: srv.cluster}
 
-	srv.kv = mvcc.New(zap.NewExample(), be, &lease.FakeLessor{}, mvcc.StoreConfig{})
+	srv.kv = mvcc.New(zap.NewExample(), be, &lease.FakeLessor{}, &namespacequota.FakeNamespaceQuotaManager{}, mvcc.StoreConfig{})
 	srv.be = be
 
 	srv.start()
@@ -1277,7 +1278,7 @@ func TestConcurrentApplyAndSnapshotV3(t *testing.T) {
 	}
 	s.applyV2 = &applierV2store{store: s.v2store, cluster: s.cluster}
 
-	s.kv = mvcc.New(lg, be, &lease.FakeLessor{}, mvcc.StoreConfig{})
+	s.kv = mvcc.New(lg, be, &lease.FakeLessor{}, &namespacequota.FakeNamespaceQuotaManager{}, mvcc.StoreConfig{})
 	s.be = be
 
 	s.start()

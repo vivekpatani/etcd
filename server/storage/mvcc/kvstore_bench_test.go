@@ -16,6 +16,7 @@ package mvcc
 
 import (
 	"context"
+	"go.etcd.io/etcd/server/v3/namespacequota"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -30,7 +31,7 @@ import (
 
 func BenchmarkStorePut(b *testing.B) {
 	be, tmpPath := betesting.NewDefaultTmpBackend(b)
-	s := NewStore(zap.NewExample(), be, &lease.FakeLessor{}, StoreConfig{})
+	s := NewStore(zap.NewExample(), be, &lease.FakeLessor{}, &namespacequota.FakeNamespaceQuotaManager{}, StoreConfig{})
 	defer cleanup(s, be, tmpPath)
 
 	// arbitrary number of bytes
@@ -49,7 +50,7 @@ func BenchmarkStoreRangeKey100(b *testing.B) { benchmarkStoreRange(b, 100) }
 
 func benchmarkStoreRange(b *testing.B, n int) {
 	be, tmpPath := betesting.NewDefaultTmpBackend(b)
-	s := NewStore(zap.NewExample(), be, &lease.FakeLessor{}, StoreConfig{})
+	s := NewStore(zap.NewExample(), be, &lease.FakeLessor{}, &namespacequota.FakeNamespaceQuotaManager{}, StoreConfig{})
 	defer cleanup(s, be, tmpPath)
 
 	// 64 byte key/val
@@ -98,7 +99,7 @@ func BenchmarkConsistentIndex(b *testing.B) {
 // BenchmarkStoreTxnPutUpdate is same as above, but instead updates single key
 func BenchmarkStorePutUpdate(b *testing.B) {
 	be, tmpPath := betesting.NewDefaultTmpBackend(b)
-	s := NewStore(zap.NewExample(), be, &lease.FakeLessor{}, StoreConfig{})
+	s := NewStore(zap.NewExample(), be, &lease.FakeLessor{}, &namespacequota.FakeNamespaceQuotaManager{}, StoreConfig{})
 	defer cleanup(s, be, tmpPath)
 
 	// arbitrary number of bytes
@@ -116,7 +117,7 @@ func BenchmarkStorePutUpdate(b *testing.B) {
 // some synchronization operations, such as mutex locking.
 func BenchmarkStoreTxnPut(b *testing.B) {
 	be, tmpPath := betesting.NewDefaultTmpBackend(b)
-	s := NewStore(zap.NewExample(), be, &lease.FakeLessor{}, StoreConfig{})
+	s := NewStore(zap.NewExample(), be, &lease.FakeLessor{}, &namespacequota.FakeNamespaceQuotaManager{}, StoreConfig{})
 	defer cleanup(s, be, tmpPath)
 
 	// arbitrary number of bytes
@@ -136,7 +137,7 @@ func BenchmarkStoreTxnPut(b *testing.B) {
 // benchmarkStoreRestore benchmarks the restore operation
 func benchmarkStoreRestore(revsPerKey int, b *testing.B) {
 	be, tmpPath := betesting.NewDefaultTmpBackend(b)
-	s := NewStore(zap.NewExample(), be, &lease.FakeLessor{}, StoreConfig{})
+	s := NewStore(zap.NewExample(), be, &lease.FakeLessor{}, &namespacequota.FakeNamespaceQuotaManager{}, StoreConfig{})
 	// use closure to capture 's' to pick up the reassignment
 	defer func() { cleanup(s, be, tmpPath) }()
 
@@ -156,7 +157,7 @@ func benchmarkStoreRestore(revsPerKey int, b *testing.B) {
 
 	b.ReportAllocs()
 	b.ResetTimer()
-	s = NewStore(zap.NewExample(), be, &lease.FakeLessor{}, StoreConfig{})
+	s = NewStore(zap.NewExample(), be, &lease.FakeLessor{}, &namespacequota.FakeNamespaceQuotaManager{}, StoreConfig{})
 }
 
 func BenchmarkStoreRestoreRevs1(b *testing.B) {
